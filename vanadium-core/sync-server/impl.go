@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/razvanm/rpc-benchmarks/vanadium-core"
 	"v.io/v23/context"
 	"v.io/v23/rpc"
@@ -13,7 +11,6 @@ type impl struct {
 }
 
 func (f *impl) Sync(_ *context.T, _ rpc.ServerCall, payload []byte) error {
-	fmt.Printf("Sync: %d bytes\n", len(payload))
 	return nil
 }
 

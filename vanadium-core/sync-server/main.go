@@ -7,6 +7,11 @@ import (
 	"v.io/v23"
 	"v.io/x/ref/lib/security/securityflag"
 	"v.io/x/ref/lib/signals"
+	"flag"
+)
+
+var (
+	name = flag.String("name", "", "Name to use in mount table")
 )
 
 func main() {
@@ -14,7 +19,7 @@ func main() {
 	defer shutdown()
 
 	auth := securityflag.NewAuthorizerOrDie()
-	_, s, err := v23.WithNewServer(ctx, "", sync.SyncServer(&impl{}), auth)
+	_, s, err := v23.WithNewServer(ctx, *name, sync.SyncServer(&impl{}), auth)
 	if err != nil {
 		log.Panic("Error listening: ", err)
 	}
