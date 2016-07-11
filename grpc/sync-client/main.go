@@ -10,8 +10,11 @@ import (
 	"github.com/razvanm/rpc-benchmarks/grpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"v.io/x/ref/test/benchmark"
 	"google.golang.org/grpc/credentials"
+	"v.io/x/ref/test/benchmark"
+	"io/ioutil"
+	"crypto/x509"
+	"crypto/tls"
 )
 
 var (
@@ -20,7 +23,9 @@ var (
 	size     = flag.Uint("size", 0, "Size of the payload")
 	stream   = flag.Bool("stream", false, "Use streaming RPCs")
 	warmup   = flag.Duration("warmup", time.Second, "Duration of the warmup")
-	caFile = flag.String("ca", "certs/ca.pem", "TLS CA file")
+	caFile   = flag.String("ca", "certs/ca.pem", "TLS CA file")
+	certFile = flag.String("cert", "certs/server.pem", "TLS cert file")
+	keyFile  = flag.String("key", "certs/server.key", "TLS key file")
 
 	client sync.SyncClient
 )
@@ -69,12 +74,31 @@ func loopStream(duration time.Duration, payload *sync.Payload) *benchmark.Stats 
 	}
 }
 
-func main() {
-	flag.Parse()
-	creds, err := credentials.NewClientTLSFromFile(*caFile, "server")
+// transportCredentials is a combination of credentials.NewClientTLSFromFile and
+// credentials.NewServerTLSFromFile.
+func transportCredentials(caCertFile, caName, certFile, keyFile string) credentials.TransportCredentials {
+	b, err := ioutil.ReadFile(caCertFile)
 	if err != nil {
 		panic(err)
 	}
+	cp := x509.NewCertPool()
+	if !cp.AppendCertsFromPEM(b) {
+		panic(err)
+	}
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		panic(err)
+	}
+	return credentials.NewTLS(&tls.Config{
+		ServerName: caName,
+		RootCAs: cp,
+		Certificates: []tls.Certificate{cert},
+	})
+}
+
+func main() {
+	flag.Parse()
+	creds := transportCredentials(*caFile, "server", *certFile, *keyFile)
 	opts := grpc.WithTransportCredentials(creds)
 	conn, err := grpc.Dial(*server, opts)
 	if err != nil {
