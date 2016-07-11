@@ -31,6 +31,6 @@ func main() {
 	}
 
 	s := grpc.NewServer(grpc.Creds(creds))
-	sync.RegisterSyncServer(s, &impl{})
+	sink.RegisterSinkServer(s, &impl{})
 	s.Serve(listener)
 }

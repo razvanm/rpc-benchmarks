@@ -9,11 +9,11 @@ import (
 type impl struct {
 }
 
-func (f *impl) Sync(ctx context.Context, payload *sync.Payload) (*sync.Void, error) {
-	return &sync.Void{}, nil
+func (f *impl) Sink(ctx context.Context, payload *sink.Payload) (*sink.Void, error) {
+	return &sink.Void{}, nil
 }
 
-func (f *impl) SyncStream(stream sync.Sync_SyncStreamServer) error {
+func (f *impl) SinkStream(stream sink.Sink_SinkStreamServer) error {
 	for {
 		_, err := stream.Recv()
 

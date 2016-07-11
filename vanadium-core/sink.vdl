@@ -1,0 +1,12 @@
+package sink
+
+import (
+	"v.io/v23/security/access"
+)
+
+type Sink interface {
+  // Sync always returns nil.
+  Sink(Payload []byte) error        {access.Read}
+  // SyncStream always returns nil.
+  SinkStream() stream<[]byte> error {access.Read}
+}

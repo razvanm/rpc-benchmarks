@@ -27,10 +27,10 @@ var (
 	certFile = flag.String("cert", "certs/server.pem", "TLS cert file")
 	keyFile  = flag.String("key", "certs/server.key", "TLS key file")
 
-	client sync.SyncClient
+	client sink.SinkClient
 )
 
-func loop(duration time.Duration, payload *sync.Payload) *benchmark.Stats {
+func loop(duration time.Duration, payload *sink.Payload) *benchmark.Stats {
 	stats := benchmark.NewStats(16)
 	end := time.After(duration)
 	var err error
@@ -40,7 +40,7 @@ func loop(duration time.Duration, payload *sync.Payload) *benchmark.Stats {
 			return stats
 		default:
 			start := time.Now()
-			_, err = client.Sync(context.Background(), payload)
+			_, err = client.Sink(context.Background(), payload)
 			elapsed := time.Since(start)
 			if err != nil {
 				panic(err)
@@ -50,9 +50,9 @@ func loop(duration time.Duration, payload *sync.Payload) *benchmark.Stats {
 	}
 }
 
-func loopStream(duration time.Duration, payload *sync.Payload) *benchmark.Stats {
+func loopStream(duration time.Duration, payload *sink.Payload) *benchmark.Stats {
 	stats := benchmark.NewStats(16)
-	stream, err := client.SyncStream(context.Background())
+	stream, err := client.SinkStream(context.Background())
 	if err != nil {
 		panic(err)
 	}
@@ -106,13 +106,13 @@ func main() {
 	}
 	defer conn.Close()
 
-	client = sync.NewSyncClient(conn)
+	client = sink.NewSinkClient(conn)
 
 	b := make([]byte, *size)
 	if _, err := rand.Read(b); err != nil {
 		panic(err)
 	}
-	payload := &sync.Payload{Payload: b}
+	payload := &sink.Payload{Payload: b}
 
 	if *stream {
 		fmt.Printf("Warming up for %s...\n", *warmup)

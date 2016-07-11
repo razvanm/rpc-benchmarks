@@ -19,7 +19,7 @@ func main() {
 	defer shutdown()
 
 	auth := securityflag.NewAuthorizerOrDie()
-	_, s, err := v23.WithNewServer(ctx, *name, sync.SyncServer(&impl{}), auth)
+	_, s, err := v23.WithNewServer(ctx, *name, sink.SinkServer(&impl{}), auth)
 	if err != nil {
 		log.Panic("Error listening: ", err)
 	}

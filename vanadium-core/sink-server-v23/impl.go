@@ -10,11 +10,11 @@ import (
 type impl struct {
 }
 
-func (f *impl) Sync(_ *context.T, _ rpc.ServerCall, payload []byte) error {
+func (f *impl) Sink(_ *context.T, _ rpc.ServerCall, payload []byte) error {
 	return nil
 }
 
-func (f *impl) SyncStream(_ *context.T, call sync.SyncSyncStreamServerCall) error {
+func (f *impl) SinkStream(_ *context.T, call sink.SinkSinkStreamServerCall) error {
 	stream := call.RecvStream()
 	for stream.Advance() {
 		// Nothing to do beside iterating over the stream.

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package sink;
+
+message Payload {
+    bytes payload = 1;
+}
+
+message Void {}
+
+service Sink {
+    rpc Sink(Payload) returns (Void) {}
+    rpc SinkStream(stream Payload) returns (Void) {}
+}

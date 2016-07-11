@@ -22,7 +22,7 @@ var (
 	warmup   = flag.Duration("warmup", time.Second, "Duration of the warmup")
 
 	rootCtx *context.T
-	stub    sync.SyncClientStub
+	stub    sink.SinkClientStub
 )
 
 func loop(duration time.Duration, payload []byte) *benchmark.Stats {
@@ -35,7 +35,7 @@ func loop(duration time.Duration, payload []byte) *benchmark.Stats {
 			return stats
 		default:
 			start := time.Now()
-			err = stub.Sync(rootCtx, payload)
+			err = stub.Sink(rootCtx, payload)
 			elapsed := time.Since(start)
 			if err != nil {
 				panic(err)
@@ -47,7 +47,7 @@ func loop(duration time.Duration, payload []byte) *benchmark.Stats {
 
 func loopStream(duration time.Duration, payload []byte) *benchmark.Stats {
 	stats := benchmark.NewStats(16)
-	call, err := stub.SyncStream(rootCtx)
+	call, err := stub.SinkStream(rootCtx)
 	if err != nil {
 		panic(err)
 	}
@@ -74,7 +74,7 @@ func main() {
 	defer shutdown()
 	rootCtx = ctx
 
-	stub = sync.SyncClient(*server)
+	stub = sink.SinkClient(*server)
 
 	payload := make([]byte, *size)
 	if _, err := rand.Read(payload); err != nil {
