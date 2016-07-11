@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"v.io/x/ref/test/benchmark"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
@@ -19,6 +20,7 @@ var (
 	size     = flag.Uint("size", 0, "Size of the payload")
 	stream   = flag.Bool("stream", false, "Use streaming RPCs")
 	warmup   = flag.Duration("warmup", time.Second, "Duration of the warmup")
+	caFile = flag.String("ca", "certs/ca.pem", "TLS CA file")
 
 	client sync.SyncClient
 )
@@ -69,7 +71,12 @@ func loopStream(duration time.Duration, payload *sync.Payload) *benchmark.Stats 
 
 func main() {
 	flag.Parse()
-	conn, err := grpc.Dial(*server, grpc.WithInsecure())
+	creds, err := credentials.NewClientTLSFromFile(*caFile, "server")
+	if err != nil {
+		panic(err)
+	}
+	opts := grpc.WithTransportCredentials(creds)
+	conn, err := grpc.Dial(*server, opts)
 	if err != nil {
 		panic(err)
 	}
