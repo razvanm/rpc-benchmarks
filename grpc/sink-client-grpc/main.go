@@ -7,14 +7,14 @@ import (
 	"os"
 	"time"
 
+	"crypto/tls"
+	"crypto/x509"
 	"github.com/razvanm/rpc-benchmarks/grpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"v.io/x/ref/test/benchmark"
 	"io/ioutil"
-	"crypto/x509"
-	"crypto/tls"
+	"v.io/x/ref/test/benchmark"
 )
 
 var (
@@ -90,8 +90,8 @@ func transportCredentials(caCertFile, caName, certFile, keyFile string) credenti
 		panic(err)
 	}
 	return credentials.NewTLS(&tls.Config{
-		ServerName: caName,
-		RootCAs: cp,
+		ServerName:   caName,
+		RootCAs:      cp,
 		Certificates: []tls.Certificate{cert},
 	})
 }
