@@ -4,7 +4,7 @@ import (
 	"github.com/razvanm/rpc-benchmarks/vanadium-core"
 	"v.io/v23/context"
 	"v.io/v23/rpc"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 )
 
 type impl struct {

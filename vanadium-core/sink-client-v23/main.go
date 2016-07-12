@@ -10,7 +10,7 @@ import (
 	"github.com/razvanm/rpc-benchmarks/vanadium-core"
 	"v.io/v23"
 	"v.io/v23/context"
-	_ "v.io/x/ref/runtime/factories/generic"
+	_ "v.io/x/ref/runtime/factories/roaming"
 	"v.io/x/ref/test/benchmark"
 )
 
