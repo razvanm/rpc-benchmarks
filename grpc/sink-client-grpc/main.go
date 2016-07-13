@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
-	"v.io/x/ref/test/benchmark"
+	"github.com/razvanm/rpc-benchmarks/stats"
 )
 
 var (
@@ -30,8 +30,8 @@ var (
 	client sink.SinkClient
 )
 
-func loop(duration time.Duration, payload *sink.Payload) *benchmark.Stats {
-	stats := benchmark.NewStats(16)
+func loop(duration time.Duration, payload *sink.Payload) *stats.Stats {
+	stats := stats.New()
 	end := time.After(duration)
 	var err error
 	for {
@@ -50,8 +50,8 @@ func loop(duration time.Duration, payload *sink.Payload) *benchmark.Stats {
 	}
 }
 
-func loopStream(duration time.Duration, payload *sink.Payload) *benchmark.Stats {
-	stats := benchmark.NewStats(16)
+func loopStream(duration time.Duration, payload *sink.Payload) *stats.Stats {
+	stats := stats.New()
 	stream, err := client.SinkStream(context.Background())
 	if err != nil {
 		panic(err)
@@ -93,6 +93,9 @@ func transportCredentials(caCertFile, caName, certFile, keyFile string) credenti
 		ServerName:   caName,
 		RootCAs:      cp,
 		Certificates: []tls.Certificate{cert},
+		CipherSuites: []uint16{tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA},
+		PreferServerCipherSuites: false,
+		CurvePreferences: []tls.CurveID{tls.CurveP256},
 	})
 }
 

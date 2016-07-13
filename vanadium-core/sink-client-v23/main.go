@@ -11,7 +11,7 @@ import (
 	"v.io/v23"
 	"v.io/v23/context"
 	_ "v.io/x/ref/runtime/factories/roaming"
-	"v.io/x/ref/test/benchmark"
+	"github.com/razvanm/rpc-benchmarks/stats"
 )
 
 var (
@@ -25,8 +25,8 @@ var (
 	stub    sink.SinkClientStub
 )
 
-func loop(duration time.Duration, payload []byte) *benchmark.Stats {
-	stats := benchmark.NewStats(16)
+func loop(duration time.Duration, payload []byte) *stats.Stats {
+	stats := stats.New()
 	end := time.After(duration)
 	var err error
 	for {
@@ -45,8 +45,8 @@ func loop(duration time.Duration, payload []byte) *benchmark.Stats {
 	}
 }
 
-func loopStream(duration time.Duration, payload []byte) *benchmark.Stats {
-	stats := benchmark.NewStats(16)
+func loopStream(duration time.Duration, payload []byte) *stats.Stats {
+	stats := stats.New()
 	call, err := stub.SinkStream(rootCtx)
 	if err != nil {
 		panic(err)
