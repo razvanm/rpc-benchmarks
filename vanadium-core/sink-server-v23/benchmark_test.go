@@ -17,6 +17,7 @@ var (
 )
 
 func loop(b *testing.B, payload []byte) {
+	_ = stub.Sink(rootCtx, payload)
 	b.ResetTimer()
 	var err error
 	for i := 0; i < b.N; i++ {
