@@ -55,11 +55,11 @@ func (s *Stats) Print(w io.Writer) {
 	fmt.Fprint(w, "------------------------------------------------------------\n")
 
 	maxBucketDigitLen := len(strconv.FormatInt(int64(max)/unitFactor, 10))
-	if maxBucketDigitLen < 3 {
-		maxBucketDigitLen = 3
+	if maxBucketDigitLen < 4 {
+		maxBucketDigitLen = 4
 	}
 	maxCountDigitLen := len(strconv.FormatInt(int64(s.len), 10))
-	fmt.Fprintf(w, "(%*s, %*d) %*d %*d %3d%%\n", maxBucketDigitLen, "-inf", maxBucketDigitLen, int64(min)/unitFactor, maxCountDigitLen, 0, maxCountDigitLen, 0, 0)
+	fmt.Fprintf(w, "(%*s, %*d) %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, "-inf", maxBucketDigitLen, int64(min)/unitFactor, maxCountDigitLen, 0, maxCountDigitLen, 0, 0, min)
 	lastDuration := int64(min)
 	lastCount := 0
 	for i := 1; i < 100; i++ {
@@ -74,9 +74,9 @@ func (s *Stats) Print(w io.Writer) {
 			pos++
 		}
 		currentDuration = int64(s.durations[pos].Nanoseconds())
-		fmt.Fprintf(w, "[%*d, %*d) %*d %*d %3d%%\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, currentDuration/unitFactor, maxCountDigitLen, pos - lastCount, maxCountDigitLen, pos, i)
+		fmt.Fprintf(w, "[%*d, %*d) %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, currentDuration/unitFactor, maxCountDigitLen, pos - lastCount, maxCountDigitLen, pos, i, currentDuration)
 		lastDuration = currentDuration
 		lastCount = pos
 	}
-	fmt.Fprintf(w, "[%*d, %*d] %*d %*d %3d%%\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, int64(max)/unitFactor, maxCountDigitLen, s.len - lastCount, maxCountDigitLen, s.len, 100)
+	fmt.Fprintf(w, "[%*d, %*d] %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, int64(max)/unitFactor, maxCountDigitLen, s.len - lastCount, maxCountDigitLen, s.len, 100, max)
 }
