@@ -1,0 +1,7 @@
+us-east1-d
+1 vCPU, 3.75 GB
+Intel Haswell
+local IPs
+CoreOS stable (1068.6.0)
+fleetctl version 0.11.7
+kernel: 4.6.3-coreos
