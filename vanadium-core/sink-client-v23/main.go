@@ -85,11 +85,11 @@ func main() {
 		fmt.Printf("Warming up for %s...\n", *warmup)
 		loopStream(*warmup, payload)
 		fmt.Printf("Benchmark params: %d bytes payload, %s duration, streaming\n", *size, *duration)
-		loopStream(*duration, payload).Print(os.Stdout)
+		loopStream(*duration, payload).Print(fmt.Sprintf("v23 %d stream", *size), os.Stdout)
 	} else {
 		fmt.Printf("Warming up for %s...\n", *warmup)
 		loop(*warmup, payload)
 		fmt.Printf("Benchmark params: %d bytes payload, %s duration, no streaming\n", *size, *duration)
-		loop(*duration, payload).Print(os.Stdout)
+		loop(*duration, payload).Print(fmt.Sprintf("v23 %d nostream", *size), os.Stdout)
 	}
 }

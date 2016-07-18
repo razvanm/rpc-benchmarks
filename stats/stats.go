@@ -5,7 +5,6 @@ import (
 	"io"
 	"time"
 	"sort"
-	"strconv"
 )
 
 type durationsSlice []time.Duration
@@ -32,7 +31,7 @@ func (s *Stats) Add(d time.Duration) {
 }
 
 // Print writes textual output of the Stats.
-func (s *Stats) Print(w io.Writer) {
+func (s *Stats) Print(suffix string, w io.Writer) {
 	if s.len < 2 {
 		fmt.Fprint(w, "Histogram (too few values)\n")
 	}
@@ -40,43 +39,18 @@ func (s *Stats) Print(w io.Writer) {
 	min := s.durations[0].Nanoseconds()
 	max := s.durations[s.len-1].Nanoseconds()
 
-	// Use the largest unit that can represent the minimum time duration.
-	unit := time.Nanosecond
-	for _, u := range []time.Duration{time.Microsecond, time.Millisecond, time.Second} {
-		if min <= u.Nanoseconds() {
-			break
-		}
-		unit = u
+	sum := int64(0)
+	for _, value := range s.durations {
+		sum = sum + value.Nanoseconds()
 	}
-	unitFactor := unit.Nanoseconds()
-
-	fmt.Fprintf(w, "Histogram (unit: %v, %dns)\n", unit, unit.Nanoseconds())
-	fmt.Fprintf(w, "Count: %d  Min: %d  Max: %d  Avg: \n", s.len, min/unitFactor, max/unitFactor)
+	fmt.Fprintf(w, "Count: %d  Min: %d  Max: %d  Avg: %d\n", s.len, min, max, sum/int64(s.len))
 	fmt.Fprint(w, "------------------------------------------------------------\n")
 
-	maxBucketDigitLen := len(strconv.FormatInt(int64(max)/unitFactor, 10))
-	if maxBucketDigitLen < 4 {
-		maxBucketDigitLen = 4
-	}
-	maxCountDigitLen := len(strconv.FormatInt(int64(s.len), 10))
-	fmt.Fprintf(w, "(%*s, %*d) %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, "-inf", maxBucketDigitLen, int64(min)/unitFactor, maxCountDigitLen, 0, maxCountDigitLen, 0, 0, min)
-	lastDuration := int64(min)
-	lastCount := 0
+	fmt.Fprintf(w, "pos total ns suffix...\n")
+	fmt.Fprintf(w, "%d %d %d %s\n", 0, s.len, min, suffix)
 	for i := 1; i < 100; i++ {
 		pos := s.len * i / 100
-		currentDuration := int64(s.durations[pos].Nanoseconds())
-		if currentDuration < lastDuration {
-			continue
-		}
-		// Skip all the values equal with the current one because we
-		// promise a ')'.
-		for pos+1 < s.len && s.durations[pos+1] == s.durations[pos] {
-			pos++
-		}
-		currentDuration = int64(s.durations[pos].Nanoseconds())
-		fmt.Fprintf(w, "[%*d, %*d) %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, currentDuration/unitFactor, maxCountDigitLen, pos - lastCount, maxCountDigitLen, pos, i, currentDuration)
-		lastDuration = currentDuration
-		lastCount = pos
+		fmt.Fprintf(w, "%d %d %d %s\n", pos, s.len, s.durations[pos], suffix)
 	}
-	fmt.Fprintf(w, "[%*d, %*d] %*d %*d %3d%% %12d ns\n", maxBucketDigitLen, lastDuration/unitFactor, maxBucketDigitLen, int64(max)/unitFactor, maxCountDigitLen, s.len - lastCount, maxCountDigitLen, s.len, 100, max)
+	fmt.Fprintf(w, "%d %d %d %s\n", s.len, s.len, max, suffix)
 }
