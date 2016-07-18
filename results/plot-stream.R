@@ -28,9 +28,7 @@ plot.one <- function(typeArg, sizeArg, stypeArg, y, pallete) {
   plot.percent(y, d[5], d[95],  pallete[5])  # 90% of the data
   plot.percent(y, d[25], d[75], pallete[1])  # 50% of the data
   segments(y-0.3, d[50], y+0.3, d[50], lwd=3, lend=1, col='white')
-  print(c(d[1], d[50], sizeArg))
   mtext(sizeName(sizeArg), side=1, at=y, las=1, line=1)
-#  mtext(typeArg, side=1, at=y, las=1, line=2, cex=0.8)
   mtext(format(d[50], digits=2), side=1, at=y, las=1, line=3.5, cex=0.8)
   return(d[50])
 }
@@ -47,9 +45,11 @@ for (size in levels(all$size)[1:4]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1f%%", m1/m2*100-100), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1f%%", m2/m1*100-100), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
 }
@@ -70,9 +70,11 @@ for (size in levels(all$size)[5:9]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1f%%", m1/m2*100-100), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1f%%", m2/m1*100-100), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
 }
