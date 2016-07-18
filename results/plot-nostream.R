@@ -84,8 +84,10 @@ axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
 x <- seq(xrange[1], xrange[2], 10)
 axis(2, x, labels=format(x, nsmall=1), lwd=0, las=1, lwd.tick=2)
 
-legend('topright', inset=0.02, bty='n', pch=15,
-       c('Vanadium', 'gRPC'), col=c(green[5], red[5]), pt.cex=2, cex=1.4)
+legend('topright', bty='n', cex=1.4,
+       c('Vanadium 98%', 'Vanadium 90%', 'Vanadium 50%', 'Median',
+         'gRPC 98%', 'gRPC 90%', 'gRPC 50%'),
+       fill=c(green[7], green[5], green[1], 'white', red[7], red[5], red[1]))
 
 par(mar=c(6, 0, 3, 0), fig=c(0, 1, 0, 1), new=T)
 title(main='Vanadium vs gRPC QPS for non-streaming RPCs', cex.main=2)
