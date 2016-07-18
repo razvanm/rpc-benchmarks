@@ -46,7 +46,7 @@ png('plot-stream.png', width=1200, height=800, bg='white')
 par(family='DejaVu Sans')
 
 # QPS plots.
-par(mar=c(4, 4, 5, 0), fig=c(0, 0.5, 0.1, 1))
+par(mar=c(4, 4, 5, 0), fig=c(0, 0.5, 0.15, 1))
 
 xrange <- c(0, 200000)
 plot(c(0, 9), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
@@ -56,10 +56,10 @@ for (size in levels(all$size)[1:4]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
+    mtext(sprintf("+%.2fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
+    mtext(sprintf("+%.2fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
@@ -71,9 +71,9 @@ x <- seq(xrange[1], xrange[2], 10000)
 axis(2, x, labels=paste(x/1000, 'K', sep=''), lwd=0, las=1, lwd.tick=2)
 mtext('Payload size \u2192', side=1, at=-0.15, las=1, line=1)
 mtext('Median QPS', side=1, at=-0.25, las=1, line=2, cex=0.8)
-mtext('QPS improvement', side=1, at=-0.16, las=1, line=3, cex=0.8, col='gray')
+mtext('Improvement', side=1, at=-0.16, las=1, line=3, cex=0.8, col='gray')
 
-par(mar=c(4, 4, 5, 2), fig=c(0.5, 1, 0.1, 1), new=T)
+par(mar=c(4, 4, 5, 2), fig=c(0.5, 1, 0.15, 1), new=T)
 xrange <- c(0, 350)
 plot(c(0, 11), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
 
@@ -82,10 +82,10 @@ for (size in levels(all$size)[5:9]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
+    mtext(sprintf("+%.2fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
+    mtext(sprintf("+%.2fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
@@ -102,13 +102,13 @@ legend('topright', bty='n', cex=1.4,
        fill=c(green[7], green[5], green[1], 'white', red[7], red[5], red[1]))
 
 # Goodput plots.
-par(mar=c(1, 4, 0, 0), fig=c(0, 0.5, 0, 0.1), new=T)
+par(mar=c(2, 4, 0, 0), fig=c(0, 0.5, 0, 0.15), new=T)
 xrange <- c(0, 260)
 plot(c(0, 9), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
 x <- seq(1, 8)
-rect(x-0.4, 0, x+0.4, goodput$goodput[x], col='black')
+rect(x-0.4, 0, x+0.4, goodput$goodput[x], col=c(green[7], red[7]), border=NA)
 text(x, goodput$goodput[x], labels=sprintf("%0.2f", goodput$goodput[x]),
-     pos=3, cex=0.8)
+     pos=3, cex=0.8, col=c(green[2], red[2]))
 
 xrange <- c(0, 200)
 x <- seq(xrange[1], xrange[2], 10)
@@ -116,21 +116,34 @@ axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
 x <- seq(xrange[1], xrange[2], 100)
 axis(2, x, labels=format(x, nsmall=1), lwd=0, las=1, lwd.tick=2)
 
-legend('topleft', bty='n', c('Goodput'), fill='black')
+mtext('Improvement', side=1, at=-0.16, las=1, line=0.5, cex=0.8, col='gray')
+x1 <- seq(1, 8, 2)
+x2 <- seq(2, 8, 2)
+axis(1, x1, labels=sprintf("+%.2fx", goodput$goodput[x1]/goodput$goodput[x2]),
+     lwd=0, las=1, lwd.tick=0, line=-0.5, cex.axis=0.8, col.axis='gray')
 
-par(mar=c(1, 4, 0, 2), fig=c(0.5, 1, 0, 0.1), new=T)
+legend('topleft', bty='n', inset=c(0, 0.1),
+       c('Vanadium goodput (MiB)', 'gRPC goodput (MiB)'),
+       pch=15, col=c(green[6], red[6]))
+
+par(mar=c(2, 4, 0, 2), fig=c(0.5, 1, 0, 0.15), new=T)
 xrange <- c(0, 260)
 plot(c(0, 11), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
 x <- seq(1, 10)
-rect(x-0.4, 0, x+0.4, goodput$goodput[x+8], col='black')
+rect(x-0.4, 0, x+0.4, goodput$goodput[x+8], col=c(green[7], red[7]), border=NA)
 text(x, goodput$goodput[x+8], labels=sprintf("%0.2f", goodput$goodput[x+8]),
-     pos=3, cex=0.8)
+     pos=3, cex=0.8, col=c(green[2], red[2]))
 
 xrange <- c(0, 200)
 x <- seq(xrange[1], xrange[2], 10)
 axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
 x <- seq(xrange[1], xrange[2], 100)
 axis(2, x, labels=format(x, nsmall=1), lwd=0, las=1, lwd.tick=2)
+
+x1 <- seq(1, 10, 2)
+x2 <- seq(2, 10, 2)
+axis(1, x1, labels=sprintf("+%.2fx", goodput$goodput[x1+8]/goodput$goodput[x2+8]),
+     lwd=0, las=1, lwd.tick=0, line=-0.5, cex.axis=0.8, col.axis='gray')
 
 # Main title.
 par(mar=c(7, 0, 3, 0), fig=c(0, 1, 0, 1), new=T)
