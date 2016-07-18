@@ -3,6 +3,15 @@ all$size <- factor(all$size)
 all$val <- all$val/1000000
 all$qps <- 1000/all$val
 
+# The last bucket contains the total number of RPCs.
+goodput <- all[seq(1,36)*101,]
+goodput$goodput <- goodput$total*as.numeric(as.character(goodput$size))/1024/1024/60
+# Consider zero payloads as being one bit.
+goodput$goodput[goodput$size == 0] <-
+    goodput$total[goodput$size == 0] / 8 / 1024/1024/60
+goodput <- goodput[,c('type', 'size', 'stype', 'goodput')]
+goodput <- goodput[goodput$stype == 'stream',]
+
 red <- c('#500003','#6C0D10','#87201C','#A0342A','#B74B3B','#CB624E','#DD7C64','#EA977C','#F3B397','#F7D1B4')
 green <- c('#022609','#0E3C16','#205225','#356A36','#4D8148','#68995D','#85B174','#A6C98C','#C9E0A7','#EFF8C4')
 sizeName <- function(val) {
@@ -29,13 +38,15 @@ plot.one <- function(typeArg, sizeArg, stypeArg, y, pallete) {
   plot.percent(y, d[25], d[75], pallete[1])  # 50% of the data
   segments(y-0.3, d[50], y+0.3, d[50], lwd=3, lend=1, col='white')
   mtext(sizeName(sizeArg), side=1, at=y, las=1, line=1)
-  mtext(format(d[50], digits=2), side=1, at=y, las=1, line=3.5, cex=0.8)
+  mtext(format(d[50], digits=2), side=1, at=y, las=1, line=2, cex=0.8)
   return(d[50])
 }
 
 png('plot-stream.png', width=1200, height=800, bg='white')
 par(family='DejaVu Sans')
-par(mar=c(6, 4, 5, 0), fig=c(0, 0.5, 0, 1))
+
+# QPS plots.
+par(mar=c(4, 4, 5, 0), fig=c(0, 0.5, 0.1, 1))
 
 xrange <- c(0, 200000)
 plot(c(0, 9), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
@@ -45,10 +56,10 @@ for (size in levels(all$size)[1:4]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
@@ -59,9 +70,10 @@ axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
 x <- seq(xrange[1], xrange[2], 10000)
 axis(2, x, labels=paste(x/1000, 'K', sep=''), lwd=0, las=1, lwd.tick=2)
 mtext('Payload size \u2192', side=1, at=-0.15, las=1, line=1)
-mtext('Median QPS', side=1, at=-0.25, las=1, line=3.5, cex=0.8)
+mtext('Median QPS', side=1, at=-0.25, las=1, line=2, cex=0.8)
+mtext('QPS improvement', side=1, at=-0.16, las=1, line=3, cex=0.8, col='gray')
 
-par(mar=c(6, 4, 5, 2), fig=c(0.5, 1, 0, 1), new=T)
+par(mar=c(4, 4, 5, 2), fig=c(0.5, 1, 0.1, 1), new=T)
 xrange <- c(0, 350)
 plot(c(0, 11), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
 
@@ -70,10 +82,10 @@ for (size in levels(all$size)[5:9]) {
   m1 <- plot.one('v23', size, 'stream', i, green)
   m2 <- plot.one('grpc', size, 'stream', i+1, red)
   if (m1 > m2) {
-    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m1/m2), side=1, at=i, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f (+%4.2fx) %9.2f\n", sizeName(size), m1, m1/m2, m2))
   } else {
-    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=4.5, cex=0.8, col='gray')
+    mtext(sprintf("+%.1fx", m2/m1), side=1, at=i+1, las=1, line=3, cex=0.8, col='gray')
     cat(sprintf("%7s %9.2f          %9.2f (+%4.2fx)\n", sizeName(size), m1, m2, m2/m1))
   }
   i <- i + 2
@@ -89,6 +101,38 @@ legend('topright', bty='n', cex=1.4,
          'gRPC 98%', 'gRPC 90%', 'gRPC 50%'),
        fill=c(green[7], green[5], green[1], 'white', red[7], red[5], red[1]))
 
-par(mar=c(6, 0, 3, 0), fig=c(0, 1, 0, 1), new=T)
+# Goodput plots.
+par(mar=c(1, 4, 0, 0), fig=c(0, 0.5, 0, 0.1), new=T)
+xrange <- c(0, 260)
+plot(c(0, 9), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
+x <- seq(1, 8)
+rect(x-0.4, 0, x+0.4, goodput$goodput[x], col='black')
+text(x, goodput$goodput[x], labels=sprintf("%0.2f", goodput$goodput[x]),
+     pos=3, cex=0.8)
+
+xrange <- c(0, 200)
+x <- seq(xrange[1], xrange[2], 10)
+axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
+x <- seq(xrange[1], xrange[2], 100)
+axis(2, x, labels=format(x, nsmall=1), lwd=0, las=1, lwd.tick=2)
+
+legend('topleft', bty='n', c('Goodput'), fill='black')
+
+par(mar=c(1, 4, 0, 2), fig=c(0.5, 1, 0, 0.1), new=T)
+xrange <- c(0, 260)
+plot(c(0, 11), xrange, type='n', ann=F, axes=F, xaxs='i', yaxs='i')
+x <- seq(1, 10)
+rect(x-0.4, 0, x+0.4, goodput$goodput[x+8], col='black')
+text(x, goodput$goodput[x+8], labels=sprintf("%0.2f", goodput$goodput[x+8]),
+     pos=3, cex=0.8)
+
+xrange <- c(0, 200)
+x <- seq(xrange[1], xrange[2], 10)
+axis(2, x, labels=F, las=2, lwd=0, lwd.tick=0.5, tcl=-0.3)
+x <- seq(xrange[1], xrange[2], 100)
+axis(2, x, labels=format(x, nsmall=1), lwd=0, las=1, lwd.tick=2)
+
+# Main title.
+par(mar=c(7, 0, 3, 0), fig=c(0, 1, 0, 1), new=T)
 title(main='Vanadium vs gRPC QPS for streaming RPCs', cex.main=2)
 dev.off()
